@@ -23,22 +23,29 @@ TARGET_SIZE = (32, 32)
 # Load in our previously trained mask model
 model = load_model(MODEL_PATH)
 
+# Path to dataset & train path
 DATASET_PATH = './dataset'
 TRAIN_PATH = DATASET_PATH + '/asl_train'
 
+# Colours for our frames and text
 GREEN = (0, 255, 0)
-
-# Grabs video capture of default web camera
-vs = cv2.VideoCapture(0)
-# Waiting while video feed is initializing
-print("Initializing video feed please wait...")
-time.sleep(5.0)
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
 
 # Gets all symbol categories from evaluation path
 symbols = sorted(os.listdir(TRAIN_PATH))
 
 # Dimensions for our cropped frame
 x, y, w, h = 100, 100, 400, 400
+
+# Text to be outputted
+pred_text = ''
+
+# Grabs video capture of default web camera
+vs = cv2.VideoCapture(0)
+# Waiting while video feed is initializing
+print("Initializing video feed please wait...")
+time.sleep(5.0)
 
 
 def prediction(image):
@@ -72,16 +79,30 @@ while True:
     rgb_img = cv2.cvtColor(crop_img, cv2.COLOR_BGR2RGB)
     resized_img = cv2.resize(rgb_img, TARGET_SIZE)
 
-    # Display the resulting frame with the provided title
+    width = int(vs.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = y - 2
+    cv2.rectangle(frame, (0, 0), (width, height), BLACK, -1)
+    cv2.putText(frame, pred_text.title(), (x + int(width/3), int(height / 2)), cv2.FONT_HERSHEY_SIMPLEX, 1.4, WHITE, 2)
+
     cv2.rectangle(frame, (x, y), (x + w, y + h), GREEN, cv2.LINE_4)
+
+    # Display the resulting frame with the provided title
     cv2.imshow("Hand Speak", frame)
 
     # Wait 1ms between frame captures
-    key = cv2.waitKey(100)
+    key = cv2.waitKey(1)
 
     # Make prediction from frame if key is 'q'
     if key == ord('p'):
-        print(prediction(resized_img))
+        pred = prediction(resized_img).lower()
+        print(pred)
+
+        if pred == 'del':
+            pred_text = pred_text.rsplit(' ', 1)[0]
+        elif pred == 'space':
+            pred_text += ' '
+        else:
+            pred_text += pred
 
     # if the key `q` or escape was pressed, break from the loop
     if key == ord('q') or key == 27:
