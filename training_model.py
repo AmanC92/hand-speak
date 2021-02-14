@@ -34,7 +34,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 TARGET_SIZE = (64, 64)
 TEST_SPLIT = 0.2
 LEARNING_RATE = 1e-4
-EPOCHS = 2
+EPOCHS = 5
 BATCH_SIZE = 32
 DROPOUT = 0.6
 
@@ -93,15 +93,15 @@ def train_model():
                   metrics=METRICS)
 
     # Train our model
-    model.fit(X_train,
-              Y_train,
-              epochs=EPOCHS,
-              batch_size=BATCH_SIZE,
-              validation_data=(X_test, Y_test))
+    history = model.fit(X_train,
+                        Y_train,
+                        epochs=EPOCHS,
+                        batch_size=BATCH_SIZE,
+                        validation_data=(X_test, Y_test)
+                        ).history
 
     # Saves model as well as the history associated with it.
     model.save(MODEL_PATH)
-    history = model.history
     dump(history, HISTORY_PATH)
 
 
@@ -195,7 +195,7 @@ if not exists(MODEL_PATH):
 
 if __name__ == '__main__':
     # Plots Validation & Training Loss/Accuracy
-    plot_history(HISTORY_PATH)
+    # plot_history(HISTORY_PATH)
 
     # Uses our utility function to predict the category from our model given an image path/data.
     predict('./dataset/test_set/space/11.png')
