@@ -24,8 +24,9 @@ def get_indexes(path):
     dictionary = {}
 
     for label in labels:
-        length = len(os.listdir(path + "/" + label))
-        dictionary[label] = length
+        if label != '.DS_Store':
+            length = len(os.listdir(path + "/" + label))
+            dictionary[label] = length
 
     return dictionary
 
@@ -33,7 +34,7 @@ def get_indexes(path):
 DATASET_PATH = '/Users/aman/PycharmProjects/hand-speak/dataset'
 TRAIN_PATH = DATASET_PATH + '/asl_train'
 TEST_PATH = DATASET_PATH + '/asl_test'
-CUSTOM = 'space'
+CUSTOM = 'have a nice day'
 
 GREEN = (0, 255, 0)
 x, y, w, h = 100, 100, 400, 400
@@ -66,12 +67,12 @@ while True:
     # if the escape key was pressed, break from the loop
     directory = TRAIN_PATH
     if ord('a') <= key <= ord('z'):
-        print(chr(key).upper())
+        print(chr(key).upper(), index_dict[chr(key).upper()])
         cv2.imwrite(directory + "/" + chr(key).upper() + "/" + str(index_dict[chr(key).upper()]) + ".jpg", crop_img)
         index_dict[chr(key).upper()] += 1
     # If space key is entered create custom data in custom folder
     elif key == 32:
-        print(CUSTOM)
+        print(CUSTOM, index_dict[CUSTOM])
         cv2.imwrite(directory + "/" + CUSTOM + "/" + str(index_dict[CUSTOM]) + ".jpg", crop_img)
         index_dict[CUSTOM] += 1
     elif key == 27:
