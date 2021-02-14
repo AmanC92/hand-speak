@@ -64,6 +64,7 @@ def prediction(image):
         score = 0
 
         if predict[0][i] >= 0.25 and predict[0][i] > score:
+            # noinspection PyUnusedLocal
             score = predict[0][i]
             res = symbols[i]
 
