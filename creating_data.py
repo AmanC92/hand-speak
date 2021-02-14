@@ -1,3 +1,4 @@
+# Used to navigate directories and introduce delays
 import os
 import time
 
