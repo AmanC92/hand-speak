@@ -128,5 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# ./idea env
+# ./idea env and other env variables
 .idea/
+.DS_Store
