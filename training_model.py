@@ -31,24 +31,24 @@ from os.path import exists
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # Setting hyper parameters, target size however is dependent on what VGG16 model was trained on
-TARGET_SIZE = (64, 64)
+TARGET_SIZE = (32, 32)
 TEST_SPLIT = 0.2
 LEARNING_RATE = 1e-4
-EPOCHS = 5
+EPOCHS = 25
 BATCH_SIZE = 32
 DROPOUT = 0.6
 
 # Model parameters and metrics. Input shape is reliant on VGG16 shape.
-INPUT_SHAPE = (64, 64, 3)
+INPUT_SHAPE = (32, 32, 3)
 OPTIMIZER = 'Adam'
 LOSS = 'categorical_crossentropy'
 METRICS = ['accuracy']
-CATEGORIES = 40
+CATEGORIES = 30
 
 # Path to dataset, train & test path, to model, and to save/load history of model
 DATASET_PATH = './dataset'
-TRAIN_PATH = DATASET_PATH + '/training_set/'
-TEST_PATH = DATASET_PATH + '/test_set/'
+TRAIN_PATH = DATASET_PATH + '/asl_train'
+TEST_PATH = DATASET_PATH + '/asl_test'
 MODEL_PATH = 'asl_model'
 HISTORY_PATH = MODEL_PATH + '/history.joblib'
 
@@ -79,7 +79,7 @@ def train_model():
     # Add the additional layers for our model and have the last layer be to the size of the
     # available categories for our model.
     classifier = Flatten()(classifier_vgg16.output)
-    classifier = Dense(units=256, activation='relu')(classifier)
+    classifier = Dense(units=512, activation='relu')(classifier)
     classifier = Dropout(DROPOUT)(classifier)
     classifier = Dense(units=CATEGORIES, activation='softmax')(classifier)
 
@@ -114,10 +114,11 @@ def get_image_data(folder):
     # Iterates over all possible images in our data and adds them to the corresponding symbol and index
     for enum, label in enumerate(symbols):
         for img in os.listdir(folder + "/" + label):
-            path = folder + "/" + label + "/" + img
-            resized_img = cv2.resize(cv2.imread(path), TARGET_SIZE)
-            X.append(resized_img)
-            Y.append(enum)
+            if img != '.DS_Store':
+                path = folder + "/" + label + "/" + img
+                resized_img = cv2.resize(cv2.imread(path), TARGET_SIZE)
+                X.append(resized_img)
+                Y.append(enum)
 
     # Converts to a numpy array before returning
     X = np.array(X)
@@ -149,12 +150,13 @@ def predict(image_path='', img_data=None, print_data=True):
     prediction = saved_model.predict(image_batch)
 
     # Gets all symbol categories from evaluation path
-    symbols = sorted(os.listdir(TEST_PATH))
+    symbols = sorted(os.listdir(TRAIN_PATH))
 
     # Iterates over array and checks to see which category the model predicted
     # and then rewrites prediction to the corresponding symbol
+    print(prediction[0])
     for i in range(len(prediction[0])):
-        if prediction[0][i] == 1:
+        if prediction[0][i] >= 0.5:
             prediction = symbols[i]
             break
         elif i == len(prediction[0]) - 1:
@@ -195,7 +197,7 @@ if not exists(MODEL_PATH):
 
 if __name__ == '__main__':
     # Plots Validation & Training Loss/Accuracy
-    # plot_history(HISTORY_PATH)
+    plot_history(HISTORY_PATH)
 
     # Uses our utility function to predict the category from our model given an image path/data.
-    predict('./dataset/test_set/space/11.png')
+    # predict('./dataset/asl_test/A')
